@@ -2,7 +2,7 @@
 
 [![PR Validation](https://github.com/dugleelabs/strapi-mcp-server/actions/workflows/pull_request.yaml/badge.svg)](https://github.com/dugleelabs/strapi-mcp-server/actions/workflows/pull_request.yaml)
 [![Semantic Release](https://github.com/dugleelabs/strapi-mcp-server/actions/workflows/release.yaml/badge.svg)](https://github.com/dugleelabs/strapi-mcp-server/actions/workflows/release.yaml)
-[![npm](https://img.shields.io/npm/v/@dugleelabs/strapi-mcp-server)](https://www.npmjs.com/package/@dugleelabs/strapi-mcp-server)
+[![GitHub Release](https://img.shields.io/github/v/release/dugleelabs/strapi-mcp-server)](https://github.com/dugleelabs/strapi-mcp-server/releases/latest)
 
 A general-purpose, open-source MCP server for Strapi v4. Exposes Strapi CRUD and schema introspection as MCP tools, with optional AI content generation (research + draft) via the Vercel AI SDK and configurable web search providers. Use it with Claude Desktop, Cursor, or any MCP-compatible agent to manage content through natural language — or automate content creation pipelines entirely.
 
