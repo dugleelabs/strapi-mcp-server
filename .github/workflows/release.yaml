@@ -13,4 +13,5 @@ permissions:
 jobs:
   release:
     uses: dugleelabs/github-workflows/.github/workflows/duglee-semantic-release.yaml@main
-    secrets: inherit
+    secrets:
+      SEMANTIC_RELEASE_TOKEN: ${{ secrets.DUGLEEBOT_TOKEN }}
