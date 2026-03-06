@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, afterEach } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 // We test loadConfig by controlling env vars and watching process.exit / process.stderr
 describe('loadConfig', () => {
@@ -15,7 +15,9 @@ describe('loadConfig', () => {
 
   it('exits with code 1 if STRAPI_URL is missing', async () => {
     setEnv({ STRAPI_URL: undefined, STRAPI_API_TOKEN: 'token' })
-    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error('exit') })
+    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => {
+      throw new Error('exit')
+    })
     const stderrSpy = vi.spyOn(process.stderr, 'write').mockImplementation(() => true)
 
     const { loadConfig } = await import('../src/config.js')
@@ -26,7 +28,9 @@ describe('loadConfig', () => {
 
   it('exits with code 1 if STRAPI_API_TOKEN is missing', async () => {
     setEnv({ STRAPI_URL: 'http://localhost:1337', STRAPI_API_TOKEN: undefined })
-    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error('exit') })
+    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => {
+      throw new Error('exit')
+    })
     vi.spyOn(process.stderr, 'write').mockImplementation(() => true)
 
     const { loadConfig } = await import('../src/config.js')

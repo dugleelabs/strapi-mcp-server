@@ -1,8 +1,8 @@
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { loadConfig } from './config.js'
 import { log } from './lib/logger.js'
-import { StrapiClient } from './strapi/client.js'
 import { createServer } from './server.js'
+import { StrapiClient } from './strapi/client.js'
 
 async function main() {
   const { config, capabilities } = loadConfig()
@@ -13,8 +13,7 @@ async function main() {
     await strapiClient.ping()
   } catch (err) {
     const msg =
-      (err as { error?: string }).error ??
-      (err instanceof Error ? err.message : String(err))
+      (err as { error?: string }).error ?? (err instanceof Error ? err.message : String(err))
     process.stderr.write(
       `ERROR: Cannot connect to Strapi at ${config.strapi.url}. Is it running?\n${msg}\n`,
     )
@@ -25,7 +24,11 @@ async function main() {
   const transport = new StdioServerTransport()
   await server.connect(transport)
 
-  const toolCount = 7 + (capabilities.search ? 1 : 0) + (capabilities.ai ? 1 : 0) + (capabilities.search && capabilities.ai ? 1 : 0)
+  const toolCount =
+    7 +
+    (capabilities.search ? 1 : 0) +
+    (capabilities.ai ? 1 : 0) +
+    (capabilities.search && capabilities.ai ? 1 : 0)
   log.info(`@dugleelabs/strapi-mcp-server ready — ${toolCount} tools enabled`)
 }
 

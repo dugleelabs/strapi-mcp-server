@@ -1,21 +1,21 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-import type { Config, Capabilities } from './config.js'
+import type { Capabilities, Config } from './config.js'
 import { log } from './lib/logger.js'
+import { registerPrompts } from './prompts/index.js'
 import type { StrapiClient } from './strapi/client.js'
 import {
-  createCrudTools,
-  ListEntriesInputSchema,
-  GetEntryInputSchema,
   CreateEntryInputSchema,
-  UpdateEntryInputSchema,
   DeleteEntryInputSchema,
+  GetEntryInputSchema,
+  ListEntriesInputSchema,
+  UpdateEntryInputSchema,
+  createCrudTools,
 } from './tools/crud.js'
 import {
-  createSchemaTools,
-  ListContentTypesInputSchema,
   GetContentTypeSchemaInputSchema,
+  ListContentTypesInputSchema,
+  createSchemaTools,
 } from './tools/schema.js'
-import { registerPrompts } from './prompts/index.js'
 
 // Lazy imports for optional tiers — loaded only if capabilities are enabled
 async function loadResearchTool() {

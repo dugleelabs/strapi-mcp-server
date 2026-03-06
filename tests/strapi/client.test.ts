@@ -1,8 +1,8 @@
-import { describe, it, expect } from 'vitest'
 import { http, HttpResponse } from 'msw'
-import { server, STRAPI_URL } from '../setup.js'
-import { StrapiClient, normaliseContentType } from '../../src/strapi/client.js'
+import { describe, expect, it } from 'vitest'
 import { ErrorCode } from '../../src/lib/errors.js'
+import { StrapiClient, normaliseContentType } from '../../src/strapi/client.js'
+import { STRAPI_URL, server } from '../setup.js'
 
 const client = new StrapiClient(STRAPI_URL, 'test-token')
 
@@ -47,7 +47,10 @@ describe('StrapiClient.listEntries', () => {
   it('throws StrapiUnauthorised on 401', async () => {
     server.use(
       http.get(`${STRAPI_URL}/api/articles`, () =>
-        HttpResponse.json({ error: { status: 401, name: 'UnauthorizedError', message: 'Unauthorized' } }, { status: 401 }),
+        HttpResponse.json(
+          { error: { status: 401, name: 'UnauthorizedError', message: 'Unauthorized' } },
+          { status: 401 },
+        ),
       ),
     )
     const err = await client.listEntries('articles').catch((e) => e)
@@ -57,7 +60,10 @@ describe('StrapiClient.listEntries', () => {
   it('throws StrapiUnauthorised on 403', async () => {
     server.use(
       http.get(`${STRAPI_URL}/api/articles`, () =>
-        HttpResponse.json({ error: { status: 403, name: 'ForbiddenError', message: 'Forbidden' } }, { status: 403 }),
+        HttpResponse.json(
+          { error: { status: 403, name: 'ForbiddenError', message: 'Forbidden' } },
+          { status: 403 },
+        ),
       ),
     )
     const err = await client.listEntries('articles').catch((e) => e)
@@ -74,7 +80,10 @@ describe('StrapiClient.getEntry', () => {
   it('throws StrapiNotFound on 404', async () => {
     server.use(
       http.get(`${STRAPI_URL}/api/articles/99`, () =>
-        HttpResponse.json({ error: { status: 404, name: 'NotFoundError', message: 'Not found' } }, { status: 404 }),
+        HttpResponse.json(
+          { error: { status: 404, name: 'NotFoundError', message: 'Not found' } },
+          { status: 404 },
+        ),
       ),
     )
     const err = await client.getEntry('articles', 99).catch((e) => e)
@@ -97,7 +106,7 @@ describe('StrapiClient.createEntry', () => {
       }),
     )
     await client.createEntry('articles', { title: 'Published' }, true)
-    expect((capturedBody?.['data'] as Record<string, unknown>)?.['publishedAt']).toBeTruthy()
+    expect((capturedBody?.data as Record<string, unknown>)?.publishedAt).toBeTruthy()
   })
 
   it('throws StrapiValidation on 400', async () => {
@@ -123,7 +132,10 @@ describe('StrapiClient.updateEntry', () => {
   it('throws StrapiNotFound when entry missing', async () => {
     server.use(
       http.put(`${STRAPI_URL}/api/articles/99`, () =>
-        HttpResponse.json({ error: { status: 404, name: 'NotFoundError', message: 'Not found' } }, { status: 404 }),
+        HttpResponse.json(
+          { error: { status: 404, name: 'NotFoundError', message: 'Not found' } },
+          { status: 404 },
+        ),
       ),
     )
     const err = await client.updateEntry('articles', 99, {}).catch((e) => e)
@@ -139,7 +151,10 @@ describe('StrapiClient.deleteEntry', () => {
   it('throws StrapiNotFound when entry missing', async () => {
     server.use(
       http.delete(`${STRAPI_URL}/api/articles/99`, () =>
-        HttpResponse.json({ error: { status: 404, name: 'NotFoundError', message: 'Not found' } }, { status: 404 }),
+        HttpResponse.json(
+          { error: { status: 404, name: 'NotFoundError', message: 'Not found' } },
+          { status: 404 },
+        ),
       ),
     )
     const err = await client.deleteEntry('articles', 99).catch((e) => e)
@@ -157,7 +172,10 @@ describe('StrapiClient.listContentTypes', () => {
   it('throws StrapiUnauthorised on 403', async () => {
     server.use(
       http.get(`${STRAPI_URL}/api/content-type-builder/content-types`, () =>
-        HttpResponse.json({ error: { status: 403, name: 'ForbiddenError', message: 'Forbidden' } }, { status: 403 }),
+        HttpResponse.json(
+          { error: { status: 403, name: 'ForbiddenError', message: 'Forbidden' } },
+          { status: 403 },
+        ),
       ),
     )
     const err = await client.listContentTypes().catch((e) => e)

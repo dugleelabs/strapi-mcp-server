@@ -1,8 +1,8 @@
 import { z } from 'zod'
 import { type ToolResult, formatError } from '../lib/errors.js'
+import { ErrorCode as EC } from '../lib/errors.js'
 import { log } from '../lib/logger.js'
 import type { StrapiClient } from '../strapi/client.js'
-import { ErrorCode as EC } from '../lib/errors.js'
 
 type ToolHandler<TInput, TOutput> = (input: TInput) => Promise<ToolResult<TOutput>>
 
@@ -74,16 +74,19 @@ export const DeleteEntryInputSchema = z.object({
 // ── Handlers ─────────────────────────────────────────────────────────────────
 
 export function createCrudTools(client: StrapiClient, strapiUrl: string) {
-  const listEntries = wrap('list_entries', async (input: z.infer<typeof ListEntriesInputSchema>) => {
-    const params: Parameters<typeof client.listEntries>[1] = {
-      page: input.page,
-      pageSize: input.pageSize,
-      status: input.status,
-    }
-    if (input.filters) params.filters = input.filters as Record<string, unknown>
-    const result = await client.listEntries(input.contentType, params)
-    return result
-  })
+  const listEntries = wrap(
+    'list_entries',
+    async (input: z.infer<typeof ListEntriesInputSchema>) => {
+      const params: Parameters<typeof client.listEntries>[1] = {
+        page: input.page,
+        pageSize: input.pageSize,
+        status: input.status,
+      }
+      if (input.filters) params.filters = input.filters as Record<string, unknown>
+      const result = await client.listEntries(input.contentType, params)
+      return result
+    },
+  )
 
   const getEntry = wrap('get_entry', async (input: z.infer<typeof GetEntryInputSchema>) => {
     const entry = await client.getEntry(input.contentType, input.id)

@@ -40,10 +40,7 @@ export class ExaSearchProvider implements SearchProvider {
     }
 
     if (!res.ok) {
-      throw formatError(
-        ErrorCode.SearchFailed,
-        `Exa returned ${res.status}: ${res.statusText}`,
-      )
+      throw formatError(ErrorCode.SearchFailed, `Exa returned ${res.status}: ${res.statusText}`)
     }
 
     const data = (await res.json()) as ExaResponse

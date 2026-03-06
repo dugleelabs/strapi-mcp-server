@@ -1,7 +1,7 @@
-import { describe, it, expect, vi } from 'vitest'
-import { createResearchTool } from '../../src/tools/research.js'
+import { describe, expect, it, vi } from 'vitest'
 import { ErrorCode } from '../../src/lib/errors.js'
 import type { SearchProvider } from '../../src/providers/search/index.js'
+import { createResearchTool } from '../../src/tools/research.js'
 
 const mockResults = [
   { title: 'Result', url: 'https://example.com', content: 'Content', score: 0.9 },

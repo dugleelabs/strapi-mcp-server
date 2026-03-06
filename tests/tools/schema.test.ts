@@ -1,8 +1,8 @@
-import { describe, it, expect } from 'vitest'
 import { http, HttpResponse } from 'msw'
-import { server, STRAPI_URL } from '../setup.js'
+import { describe, expect, it } from 'vitest'
 import { StrapiClient } from '../../src/strapi/client.js'
 import { createSchemaTools } from '../../src/tools/schema.js'
+import { STRAPI_URL, server } from '../setup.js'
 
 const client = new StrapiClient(STRAPI_URL, 'test-token')
 const tools = createSchemaTools(client)

@@ -17,6 +17,5 @@ export const log = {
   info: (message: string) => write('INFO', message),
   warn: (message: string) => write('WARN', message),
   error: (message: string) => write('ERROR', message),
-  tool: (name: string, args: unknown) =>
-    write('TOOL', `${name} ${serialize(args)}`),
+  tool: (name: string, args: unknown) => write('TOOL', `${name} ${serialize(args)}`),
 }

@@ -1,8 +1,8 @@
 import { z } from 'zod'
-import { ErrorCode, formatError, type ToolResult } from '../lib/errors.js'
+import type { Capabilities } from '../config.js'
+import { ErrorCode, type ToolResult, formatError } from '../lib/errors.js'
 import { log } from '../lib/logger.js'
 import type { SearchProvider, SearchResult } from '../providers/search/index.js'
-import type { Capabilities } from '../config.js'
 
 export const ResearchTopicInputSchema = z.object({
   topic: z.string().describe('Topic or query to research'),

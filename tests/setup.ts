@@ -1,7 +1,7 @@
-import { setupServer } from 'msw/node'
 import { http, HttpResponse } from 'msw'
+import { setupServer } from 'msw/node'
 import { afterAll, afterEach, beforeAll } from 'vitest'
-import type { StrapiEntry, StrapiContentType } from '../src/strapi/types.js'
+import type { StrapiContentType, StrapiEntry } from '../src/strapi/types.js'
 
 // ── Shared fixtures ───────────────────────────────────────────────────────────
 

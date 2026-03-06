@@ -182,7 +182,7 @@ export class StrapiClient {
     const ct = normaliseContentType(contentType)
     const body: Record<string, unknown> = { data }
     if (publish) {
-      body['data'] = { ...data, publishedAt: new Date().toISOString() }
+      body.data = { ...data, publishedAt: new Date().toISOString() }
     }
     const res = await this.request<StrapiSingleResponse>('POST', `/api/${ct}`, body)
     return res.data
