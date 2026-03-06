@@ -1,8 +1,8 @@
 import type { Config } from '../../config.js'
 import { ErrorCode, formatError } from '../../lib/errors.js'
-import { TavilySearchProvider } from './tavily.js'
 import { BraveSearchProvider } from './brave.js'
 import { ExaSearchProvider } from './exa.js'
+import { TavilySearchProvider } from './tavily.js'
 
 export interface SearchResult {
   title: string

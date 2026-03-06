@@ -1,8 +1,8 @@
 import { z } from 'zod'
-import { ErrorCode as EC, formatError, type ToolResult } from '../lib/errors.js'
+import { ErrorCode as EC, type ToolResult, formatError } from '../lib/errors.js'
 import { log } from '../lib/logger.js'
-import type { StrapiContentType } from '../strapi/types.js'
 import type { StrapiClient } from '../strapi/client.js'
+import type { StrapiContentType } from '../strapi/types.js'
 
 const CACHE_TTL_MS = 5 * 60 * 1000 // 5 minutes
 
@@ -43,9 +43,11 @@ export const GetContentTypeSchemaInputSchema = z.object({
 // ── Handlers ─────────────────────────────────────────────────────────────────
 
 export function createSchemaTools(client: StrapiClient) {
-  async function listContentTypes(
-    _input: z.infer<typeof ListContentTypesInputSchema>,
-  ): Promise<ToolResult<{ contentTypes: Array<{ uid: string; displayName: string; pluralName: string; kind: string }> }>> {
+  async function listContentTypes(_input: z.infer<typeof ListContentTypesInputSchema>): Promise<
+    ToolResult<{
+      contentTypes: Array<{ uid: string; displayName: string; pluralName: string; kind: string }>
+    }>
+  > {
     log.tool('list_content_types', {})
     try {
       const all = await getCachedContentTypes(client)
@@ -71,7 +73,13 @@ export function createSchemaTools(client: StrapiClient) {
 
   async function getContentTypeSchema(
     input: z.infer<typeof GetContentTypeSchemaInputSchema>,
-  ): Promise<ToolResult<{ uid: string; displayName: string; attributes: Record<string, { type: string; required?: boolean; default?: unknown }> }>> {
+  ): Promise<
+    ToolResult<{
+      uid: string
+      displayName: string
+      attributes: Record<string, { type: string; required?: boolean; default?: unknown }>
+    }>
+  > {
     log.tool('get_content_type_schema', input)
     try {
       // Check cache first for individual schema

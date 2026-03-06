@@ -1,12 +1,14 @@
-name: CI
+name: PR Validation
 
 on:
-  push:
-    branches: [main]
   pull_request:
+    types: [opened, synchronize, reopened, edited]
     branches: [main]
 
 jobs:
+  validate-title:
+    uses: dugleelabs/github-workflows/.github/workflows/duglee-pr-validation.yaml@main
+
   ci:
     name: Lint, Test & Build
     runs-on: ubuntu-latest

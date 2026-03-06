@@ -7,7 +7,7 @@ export async function createAIModel(config: NonNullable<Config['ai']>): Promise<
     case 'anthropic': {
       try {
         const { createAnthropic } = await import('@ai-sdk/anthropic')
-        const anthropic = createAnthropic({ apiKey: config.apiKey! })
+        const anthropic = createAnthropic({ apiKey: config.apiKey ?? '' })
         return anthropic(config.model)
       } catch (err) {
         if ((err as { success?: boolean }).success === false) throw err
@@ -20,7 +20,7 @@ export async function createAIModel(config: NonNullable<Config['ai']>): Promise<
     case 'openai': {
       try {
         const { createOpenAI } = await import('@ai-sdk/openai')
-        const openai = createOpenAI({ apiKey: config.apiKey! })
+        const openai = createOpenAI({ apiKey: config.apiKey ?? '' })
         return openai(config.model)
       } catch (err) {
         if ((err as { success?: boolean }).success === false) throw err
@@ -33,7 +33,7 @@ export async function createAIModel(config: NonNullable<Config['ai']>): Promise<
     case 'google': {
       try {
         const { createGoogleGenerativeAI } = await import('@ai-sdk/google')
-        const google = createGoogleGenerativeAI({ apiKey: config.apiKey! })
+        const google = createGoogleGenerativeAI({ apiKey: config.apiKey ?? '' })
         return google(config.model)
       } catch (err) {
         if ((err as { success?: boolean }).success === false) throw err
@@ -46,7 +46,7 @@ export async function createAIModel(config: NonNullable<Config['ai']>): Promise<
     case 'mistral': {
       try {
         const { createMistral } = await import('@ai-sdk/mistral')
-        const mistral = createMistral({ apiKey: config.apiKey! })
+        const mistral = createMistral({ apiKey: config.apiKey ?? '' })
         return mistral(config.model)
       } catch (err) {
         if ((err as { success?: boolean }).success === false) throw err
@@ -60,7 +60,7 @@ export async function createAIModel(config: NonNullable<Config['ai']>): Promise<
       // Ollama is OpenAI-compatible — use @ai-sdk/openai with a custom baseURL
       try {
         const { createOpenAI } = await import('@ai-sdk/openai')
-        const ollamaBaseUrl = process.env['OLLAMA_BASE_URL'] ?? 'http://localhost:11434'
+        const ollamaBaseUrl = process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434'
         const ollama = createOpenAI({ baseURL: `${ollamaBaseUrl}/v1`, apiKey: 'ollama' })
         return ollama(config.model)
       } catch (err) {

@@ -1,12 +1,11 @@
-name: Release
+name: Build and Publish
 
 on:
-  push:
-    tags:
-      - 'v*'
+  release:
+    types: [published]
 
 jobs:
-  release:
+  publish:
     name: Publish to npm
     runs-on: ubuntu-latest
 

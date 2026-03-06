@@ -1,11 +1,11 @@
-import { describe, it, expect } from 'vitest'
 import { http, HttpResponse } from 'msw'
-import { server } from '../setup.js'
-import { TavilySearchProvider } from '../../src/providers/search/tavily.js'
+import { describe, expect, it } from 'vitest'
+import { ErrorCode } from '../../src/lib/errors.js'
 import { BraveSearchProvider } from '../../src/providers/search/brave.js'
 import { ExaSearchProvider } from '../../src/providers/search/exa.js'
 import { createSearchProvider } from '../../src/providers/search/index.js'
-import { ErrorCode } from '../../src/lib/errors.js'
+import { TavilySearchProvider } from '../../src/providers/search/tavily.js'
+import { server } from '../setup.js'
 
 describe('TavilySearchProvider', () => {
   const provider = new TavilySearchProvider('test-key')
@@ -47,7 +47,9 @@ describe('BraveSearchProvider', () => {
       http.get('https://api.search.brave.com/res/v1/web/search', () =>
         HttpResponse.json({
           web: {
-            results: [{ title: 'Brave Result', url: 'https://brave.com/1', description: 'Brave desc' }],
+            results: [
+              { title: 'Brave Result', url: 'https://brave.com/1', description: 'Brave desc' },
+            ],
           },
         }),
       ),
@@ -76,7 +78,9 @@ describe('ExaSearchProvider', () => {
     server.use(
       http.post('https://api.exa.ai/search', () =>
         HttpResponse.json({
-          results: [{ title: 'Exa Result', url: 'https://exa.ai/1', text: 'Exa content', score: 0.95 }],
+          results: [
+            { title: 'Exa Result', url: 'https://exa.ai/1', text: 'Exa content', score: 0.95 },
+          ],
         }),
       ),
     )
@@ -88,9 +92,7 @@ describe('ExaSearchProvider', () => {
 
 describe('createSearchProvider factory', () => {
   it('throws on unknown provider', () => {
-    expect(() =>
-      createSearchProvider({ provider: 'unknown' as 'tavily', apiKey: 'key' }),
-    ).toThrow()
+    expect(() => createSearchProvider({ provider: 'unknown' as 'tavily', apiKey: 'key' })).toThrow()
   })
 
   it('returns TavilySearchProvider for tavily', () => {

@@ -39,8 +39,8 @@ const AI_PROVIDER_KEYS: Record<string, string | undefined> = {
 }
 
 export function loadConfig(): { config: Config; capabilities: Capabilities } {
-  const strapiUrl = process.env['STRAPI_URL']
-  const strapiApiToken = process.env['STRAPI_API_TOKEN']
+  const strapiUrl = process.env.STRAPI_URL
+  const strapiApiToken = process.env.STRAPI_API_TOKEN
 
   if (!strapiUrl) {
     process.stderr.write('ERROR: STRAPI_URL is required\n')
@@ -59,7 +59,7 @@ export function loadConfig(): { config: Config; capabilities: Capabilities } {
   const capabilities: Capabilities = { crud: true, search: false, ai: false }
 
   // Search capability
-  const searchProvider = process.env['SEARCH_PROVIDER'] as SearchProviderName | undefined
+  const searchProvider = process.env.SEARCH_PROVIDER as SearchProviderName | undefined
   if (searchProvider) {
     if (!(searchProvider in SEARCH_PROVIDER_KEYS)) {
       log.warn(
@@ -78,8 +78,8 @@ export function loadConfig(): { config: Config; capabilities: Capabilities } {
   }
 
   // AI capability
-  const aiProvider = process.env['AI_PROVIDER']
-  const aiModel = process.env['AI_MODEL']
+  const aiProvider = process.env.AI_PROVIDER
+  const aiModel = process.env.AI_MODEL
   if (aiProvider) {
     if (!(aiProvider in AI_PROVIDER_KEYS)) {
       log.warn(
@@ -90,7 +90,7 @@ export function loadConfig(): { config: Config; capabilities: Capabilities } {
     } else {
       const keyName = AI_PROVIDER_KEYS[aiProvider]
       if (aiProvider === 'ollama') {
-        const ollamaBase = process.env['OLLAMA_BASE_URL']
+        const ollamaBase = process.env.OLLAMA_BASE_URL
         if (!ollamaBase) {
           log.warn('OLLAMA_BASE_URL not set — AI tools disabled.')
         } else {

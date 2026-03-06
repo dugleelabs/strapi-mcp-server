@@ -1,11 +1,11 @@
 import { generateObject } from 'ai'
 import type { LanguageModel } from 'ai'
 import { z } from 'zod'
-import { ErrorCode, formatError, type ToolResult } from '../lib/errors.js'
-import { log } from '../lib/logger.js'
-import type { StrapiClient } from '../strapi/client.js'
-import type { SearchProvider } from '../providers/search/index.js'
 import type { Capabilities } from '../config.js'
+import { ErrorCode, type ToolResult, formatError } from '../lib/errors.js'
+import { log } from '../lib/logger.js'
+import type { SearchProvider } from '../providers/search/index.js'
+import type { StrapiClient } from '../strapi/client.js'
 
 // ── Schemas ──────────────────────────────────────────────────────────────────
 
@@ -75,9 +75,7 @@ export function createContentTools(
   strapiUrl: string,
   capabilities: Capabilities,
 ) {
-  async function generateDraft(
-    input: GenerateDraftInput,
-  ): Promise<ToolResult<DraftOutput>> {
+  async function generateDraft(input: GenerateDraftInput): Promise<ToolResult<DraftOutput>> {
     log.tool('generate_draft', { topic: input.topic, targetWordCount: input.targetWordCount })
 
     if (!capabilities.ai) {
@@ -94,9 +92,7 @@ export function createContentTools(
             .join('\n\n')}`
         : ''
 
-    const styleSection = input.styleGuide
-      ? `\n\nEditorial style guide: ${input.styleGuide}`
-      : ''
+    const styleSection = input.styleGuide ? `\n\nEditorial style guide: ${input.styleGuide}` : ''
 
     const contextSection = input.context ? `\n\nAdditional context: ${input.context}` : ''
 
@@ -138,9 +134,15 @@ export function createContentTools(
     }
   }
 
-  async function createContentFromResearch(
-    input: CreateContentFromResearchInput,
-  ): Promise<ToolResult<{ strapiId: number; adminUrl: string; title: string; wordCount: number; step: string }>> {
+  async function createContentFromResearch(input: CreateContentFromResearchInput): Promise<
+    ToolResult<{
+      strapiId: number
+      adminUrl: string
+      title: string
+      wordCount: number
+      step: string
+    }>
+  > {
     log.tool('create_content_from_research', { topic: input.topic, contentType: input.contentType })
 
     if (!capabilities.search || !capabilities.ai) {
@@ -192,10 +194,10 @@ export function createContentTools(
     // Step 3: Map fields and create Strapi entry
     const mapping = input.fieldMapping ?? {}
     const strapiData: Record<string, unknown> = {
-      [mapping['title'] ?? 'title']: draft.title,
-      [mapping['body'] ?? 'body']: draft.body,
-      [mapping['metaDescription'] ?? 'metaDescription']: draft.metaDescription,
-      [mapping['tags'] ?? 'tags']: draft.tags,
+      [mapping.title ?? 'title']: draft.title,
+      [mapping.body ?? 'body']: draft.body,
+      [mapping.metaDescription ?? 'metaDescription']: draft.metaDescription,
+      [mapping.tags ?? 'tags']: draft.tags,
     }
 
     try {

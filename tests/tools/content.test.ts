@@ -1,12 +1,12 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { http, HttpResponse } from 'msw'
 import { generateObject } from 'ai'
-import { server, STRAPI_URL } from '../setup.js'
+import type { LanguageModel } from 'ai'
+import { http, HttpResponse } from 'msw'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { ErrorCode } from '../../src/lib/errors.js'
+import type { SearchProvider } from '../../src/providers/search/index.js'
 import { StrapiClient } from '../../src/strapi/client.js'
 import { createContentTools } from '../../src/tools/content.js'
-import { ErrorCode } from '../../src/lib/errors.js'
-import type { LanguageModel } from 'ai'
-import type { SearchProvider } from '../../src/providers/search/index.js'
+import { STRAPI_URL, server } from '../setup.js'
 
 // Mock the AI SDK generateObject
 vi.mock('ai', () => ({
@@ -25,9 +25,11 @@ const client = new StrapiClient(STRAPI_URL, 'test-token')
 
 const mockSearchProvider: SearchProvider = {
   name: 'tavily',
-  search: vi.fn().mockResolvedValue([
-    { title: 'Research Result', url: 'https://example.com', content: 'Research content' },
-  ]),
+  search: vi
+    .fn()
+    .mockResolvedValue([
+      { title: 'Research Result', url: 'https://example.com', content: 'Research content' },
+    ]),
 }
 
 const capabilitiesWithBoth = { crud: true as const, search: true, ai: true }
@@ -41,7 +43,12 @@ describe('generate_draft', () => {
 
   it('returns correct shape with wordCount', async () => {
     vi.mocked(generateObject).mockResolvedValueOnce({
-      object: { title: 'Test Title', body: 'Test body content.', metaDescription: 'Meta.', tags: ['tag1'] },
+      object: {
+        title: 'Test Title',
+        body: 'Test body content.',
+        metaDescription: 'Meta.',
+        tags: ['tag1'],
+      },
     } as never)
     const tools = createContentTools(mockModel, client, undefined, STRAPI_URL, capabilitiesAiOnly)
     const result = await tools.generateDraft({ topic: 'TypeScript', targetWordCount: 800 })
@@ -77,13 +84,27 @@ describe('create_content_from_research', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(generateObject).mockResolvedValue({
-      object: { title: 'Research Title', body: 'Body content.', metaDescription: 'Meta.', tags: ['tag'] },
+      object: {
+        title: 'Research Title',
+        body: 'Body content.',
+        metaDescription: 'Meta.',
+        tags: ['tag'],
+      },
     } as never)
   })
 
   it('returns complete result on all steps succeeding', async () => {
-    const tools = createContentTools(mockModel, client, mockSearchProvider, STRAPI_URL, capabilitiesWithBoth)
-    const result = await tools.createContentFromResearch({ topic: 'AI trends', contentType: 'articles' })
+    const tools = createContentTools(
+      mockModel,
+      client,
+      mockSearchProvider,
+      STRAPI_URL,
+      capabilitiesWithBoth,
+    )
+    const result = await tools.createContentFromResearch({
+      topic: 'AI trends',
+      contentType: 'articles',
+    })
     expect(result.success).toBe(true)
     if (result.success) {
       expect(result.data.step).toBe('complete')
@@ -97,7 +118,13 @@ describe('create_content_from_research', () => {
       name: 'tavily',
       search: vi.fn().mockRejectedValue(new Error('Search failed')),
     }
-    const tools = createContentTools(mockModel, client, failingSearch, STRAPI_URL, capabilitiesWithBoth)
+    const tools = createContentTools(
+      mockModel,
+      client,
+      failingSearch,
+      STRAPI_URL,
+      capabilitiesWithBoth,
+    )
     const result = await tools.createContentFromResearch({ topic: 'test', contentType: 'articles' })
     expect(result.success).toBe(false)
     if (!result.success) {
@@ -109,7 +136,13 @@ describe('create_content_from_research', () => {
   it('returns generate error when AI fails, no Strapi call made', async () => {
     vi.mocked(generateObject).mockRejectedValueOnce(new Error('AI error'))
     const strapiCreateSpy = vi.spyOn(client, 'createEntry')
-    const tools = createContentTools(mockModel, client, mockSearchProvider, STRAPI_URL, capabilitiesWithBoth)
+    const tools = createContentTools(
+      mockModel,
+      client,
+      mockSearchProvider,
+      STRAPI_URL,
+      capabilitiesWithBoth,
+    )
     const result = await tools.createContentFromResearch({ topic: 'test', contentType: 'articles' })
     expect(result.success).toBe(false)
     if (!result.success) {
@@ -127,7 +160,13 @@ describe('create_content_from_research', () => {
         ),
       ),
     )
-    const tools = createContentTools(mockModel, client, mockSearchProvider, STRAPI_URL, capabilitiesWithBoth)
+    const tools = createContentTools(
+      mockModel,
+      client,
+      mockSearchProvider,
+      STRAPI_URL,
+      capabilitiesWithBoth,
+    )
     const result = await tools.createContentFromResearch({ topic: 'test', contentType: 'articles' })
     expect(result.success).toBe(false)
     if (!result.success) {
@@ -143,13 +182,19 @@ describe('create_content_from_research', () => {
         return HttpResponse.json({ data: { id: 99, attributes: {} }, meta: {} })
       }),
     )
-    const tools = createContentTools(mockModel, client, mockSearchProvider, STRAPI_URL, capabilitiesWithBoth)
+    const tools = createContentTools(
+      mockModel,
+      client,
+      mockSearchProvider,
+      STRAPI_URL,
+      capabilitiesWithBoth,
+    )
     await tools.createContentFromResearch({
       topic: 'test',
       contentType: 'articles',
       fieldMapping: { title: 'headline', body: 'content' },
     })
-    const data = capturedBody?.['data'] as Record<string, unknown>
+    const data = capturedBody?.data as Record<string, unknown>
     expect(data).toHaveProperty('headline')
     expect(data).toHaveProperty('content')
     expect(data).not.toHaveProperty('title')
