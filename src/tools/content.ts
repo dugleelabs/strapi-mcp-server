@@ -23,6 +23,18 @@ export const GenerateDraftInputSchema = z.object({
     .array(SearchResultSchema)
     .optional()
     .describe('Research results from research_topic to use as source material'),
+  imageUrls: z
+    .array(z.string())
+    .optional()
+    .describe(
+      'Image URLs to embed inline in the article body. The first URL is used as the cover image suggestion. Remaining URLs are placed between sections as illustrations.',
+    ),
+  keywords: z
+    .string()
+    .optional()
+    .describe(
+      'Comma-separated SEO keyword strategy: primary keyword first, then secondary, long-tail, and LSI terms. The primary keyword must appear in the title, first paragraph, and at least one H2.',
+    ),
   styleGuide: z.string().optional().describe('Editorial voice instructions'),
   targetWordCount: z
     .number()
@@ -52,6 +64,10 @@ const DraftOutputSchema = z.object({
   title: z.string().describe('Blog post title'),
   body: z.string().describe('Full post in Markdown'),
   metaDescription: z.string().describe('SEO meta description (under 160 characters)'),
+  seoTitle: z.string().describe('SEO page title, optimised for search (50–60 characters)'),
+  keywords: z.string().describe('Comma-separated SEO keywords relevant to the topic'),
+  socialTitle: z.string().describe('Social media sharing title (under 70 characters)'),
+  socialDescription: z.string().describe('Social media sharing description (under 200 characters)'),
   tags: z.array(z.string()).describe('Suggested tags'),
 })
 
@@ -62,6 +78,10 @@ export interface DraftOutput {
   title: string
   body: string
   metaDescription: string
+  seoTitle: string
+  keywords: string
+  socialTitle: string
+  socialDescription: string
   tags: string[]
   wordCount: number
 }
@@ -87,26 +107,43 @@ export function createContentTools(
 
     const researchSection =
       input.researchResults && input.researchResults.length > 0
-        ? `\n\nUse the following research as your primary source material:\n\n${input.researchResults
+        ? `\n\nResearch sources — use these as primary material and cite them as inline Markdown links and in a References section at the bottom:\n\n${input.researchResults
             .map((r, i) => `[${i + 1}] ${r.title}\n${r.url}\n${r.content}`)
             .join('\n\n')}`
         : ''
 
-    const styleSection = input.styleGuide ? `\n\nEditorial style guide: ${input.styleGuide}` : ''
+    const keywordsSection = input.keywords
+      ? `\n\nSEO keyword strategy (primary keyword is first — embed it in the title, opening paragraph, and at least one H2; distribute secondary and LSI terms naturally throughout): ${input.keywords}`
+      : ''
+
+    const imagesSection =
+      input.imageUrls && input.imageUrls.length > 0
+        ? `\n\nInline images — embed these in the body using Markdown image syntax at natural section breaks:\n${input.imageUrls.map((url, i) => `Image ${i + 1}: ${url}`).join('\n')}`
+        : ''
 
     const contextSection = input.context ? `\n\nAdditional context: ${input.context}` : ''
 
     const systemPrompt = [
-      'You are a skilled technical writer producing developer-focused blog content.',
+      'You are an expert content writer and SEO strategist writing for dugleelabs.io — a blog that publishes opinionated takes on technology, software craft, and the developer experience.',
       `Write a blog post of approximately ${input.targetWordCount} words.`,
-      'The body must be in Markdown. The meta description must be under 160 characters.',
-      'Write with authority and clarity. Avoid marketing fluff.',
-      styleSection,
+      'The body must be in Markdown.',
+
+      'VOICE: Write as a personal viewpoint, critique, or practical guide — not a neutral summary. Take a clear stance. Use "we" and "our" to reflect the dugleelabs perspective. Be direct and opinionated.',
+
+      'STRUCTURE: Open with a hook that states the point of view immediately. Use H2/H3 headings. Place inline images between sections using Markdown image syntax (![descriptive alt text](url)). End with a "## Join the Conversation" section that poses 1–2 open questions and invites readers to engage, with a mention of dugleelabs.io linking to https://dugleelabs.io.',
+
+      'REFERENCES: Cite sources as inline Markdown links where facts or quotes are used. Add a "## References" section at the bottom with numbered backlinks to all sources. Where relevant, link back to https://dugleelabs.io.',
+
+      'SEO: The primary keyword must appear in the title, within the first 100 words, and in at least one H2. Secondary and LSI keywords should be distributed naturally — never stuffed. Target 1–2% keyword density for the primary keyword.',
+
+      'SEO FIELDS: Populate seoTitle (50–60 chars, primary keyword first), metaDescription (under 160 chars, includes primary keyword and a soft CTA), keywords (comma-separated ordered by importance), socialTitle (under 70 chars, engaging and shareable), socialDescription (under 200 chars, hook-driven).',
+
+      input.styleGuide ? `STYLE GUIDE: ${input.styleGuide}` : '',
     ]
       .filter(Boolean)
-      .join(' ')
+      .join('\n\n')
 
-    const userPrompt = `Write a blog post about: ${input.topic}${contextSection}${researchSection}`
+    const userPrompt = `Write a blog post about: ${input.topic}${contextSection}${keywordsSection}${imagesSection}${researchSection}`
 
     try {
       const { object } = await generateObject({
@@ -163,12 +200,17 @@ export function createContentTools(
     try {
       researchResults = await searchProvider.search(query, 10)
     } catch (err) {
-      return {
-        success: false,
-        code: ErrorCode.SearchFailed,
-        error: `Research step failed: ${err instanceof Error ? err.message : String(err)}`,
-        details: { step: 'research' },
+      if ((err as { success?: boolean }).success === false) {
+        return {
+          ...(err as Extract<ToolResult<never>, { success: false }>),
+          details: { step: 'research' },
+        }
       }
+      return formatError(
+        ErrorCode.SearchFailed,
+        `Research step failed: ${err instanceof Error ? err.message : String(err)}`,
+        { step: 'research' },
+      )
     }
 
     // Step 2: Generate draft
