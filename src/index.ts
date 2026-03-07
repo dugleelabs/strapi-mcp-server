@@ -1,4 +1,5 @@
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
+import 'dotenv/config'
 import { loadConfig } from './config.js'
 import { log } from './lib/logger.js'
 import { createServer } from './server.js'

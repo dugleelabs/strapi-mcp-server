@@ -127,7 +127,25 @@ export class StrapiClient {
   }
 
   async ping(): Promise<void> {
-    await this.request<unknown>('GET', '/api')
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), 10_000)
+    try {
+      await fetch(`${this.baseUrl}/api`, {
+        signal: controller.signal,
+        headers: { Authorization: `Bearer ${this.token}` },
+      })
+    } catch (err) {
+      const isAbort =
+        err instanceof Error && (err.name === 'AbortError' || err.name === 'TimeoutError')
+      throw formatError(
+        ErrorCode.StrapiNetwork,
+        isAbort
+          ? `Strapi did not respond within 10s. Is it running at ${this.baseUrl}?`
+          : `Cannot connect to Strapi at ${this.baseUrl}. Is it running? ${err instanceof Error ? err.message : String(err)}`,
+      )
+    } finally {
+      clearTimeout(timer)
+    }
   }
 
   async listEntries(contentType: string, params: ListParams = {}): Promise<ListResponse> {

@@ -38,7 +38,11 @@ export class TavilySearchProvider implements SearchProvider {
     }
 
     if (!res.ok) {
-      throw formatError(ErrorCode.SearchFailed, `Tavily returned ${res.status}: ${res.statusText}`)
+      const body = await res.text().catch(() => '')
+      throw formatError(
+        ErrorCode.SearchFailed,
+        `Tavily returned ${res.status}: ${body || res.statusText}`,
+      )
     }
 
     const data = (await res.json()) as TavilyResponse

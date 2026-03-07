@@ -32,14 +32,18 @@ The server starts over stdio and is ready to use immediately. All configuration 
 
 ## Claude Desktop Configuration
 
-Add this to your `claude_desktop_config.json` (usually at `~/Library/Application Support/Claude/claude_desktop_config.json`):
+Add this to your `claude_desktop_config.json` (usually at `~/Library/Application Support/Claude/claude_desktop_config.json`).
+
+### Standard setup (system Node or Homebrew Node)
+
+If you installed Node.js via the official installer or Homebrew — not nvm — bare `npx` works:
 
 ```json
 {
   "mcpServers": {
     "strapi": {
-      "command": "pnpm",
-      "args": ["dlx", "@dugleelabs/strapi-mcp-server"],
+      "command": "npx",
+      "args": ["-y", "@dugleelabs/strapi-mcp-server"],
       "env": {
         "STRAPI_URL": "http://localhost:1337",
         "STRAPI_API_TOKEN": "your-token-here",
@@ -53,6 +57,67 @@ Add this to your `claude_desktop_config.json` (usually at `~/Library/Application
   }
 }
 ```
+
+### nvm users
+
+Claude Desktop launches processes with a fixed PATH that does not respect your active nvm version. Any command with a `#!/usr/bin/env node` shebang — including `npx`, `pnpm`, and the `strapi-mcp-server` binary itself — will be executed by whichever `node` appears first in that PATH, typically the oldest version you have installed.
+
+The only reliable fix is to use the **absolute path to your `node` binary** as the command, and point directly to the server's JavaScript file. This bypasses shebang resolution entirely.
+
+**Step 1 — Find your Node path**
+
+Run this in your terminal to get the absolute path for the Node version you want to use:
+
+```bash
+# If using a specific nvm version
+nvm use 22
+which node
+# → /Users/you/.nvm/versions/node/v22.20.0/bin/node
+
+# Or pick the path directly
+ls ~/.nvm/versions/node/
+```
+
+**Step 2 — Get the server entry point**
+
+Either use a local clone (recommended for development):
+
+```bash
+git clone https://github.com/dugleelabs/strapi-mcp-server.git
+cd strapi-mcp-server && pnpm install && pnpm build
+# entry point: /path/to/strapi-mcp-server/dist/index.js
+```
+
+Or install globally under your chosen Node version:
+
+```bash
+/Users/you/.nvm/versions/node/v22.20.0/bin/npm install -g @dugleelabs/strapi-mcp-server
+# entry point: /Users/you/.nvm/versions/node/v22.20.0/lib/node_modules/@dugleelabs/strapi-mcp-server/dist/index.js
+```
+
+**Step 3 — Update your config**
+
+```json
+{
+  "mcpServers": {
+    "strapi": {
+      "command": "/Users/you/.nvm/versions/node/v22.20.0/bin/node",
+      "args": ["/path/to/strapi-mcp-server/dist/index.js"],
+      "env": {
+        "STRAPI_URL": "http://localhost:1337",
+        "STRAPI_API_TOKEN": "your-token-here",
+        "AI_PROVIDER": "anthropic",
+        "AI_MODEL": "claude-sonnet-4-6",
+        "ANTHROPIC_API_KEY": "sk-ant-...",
+        "SEARCH_PROVIDER": "tavily",
+        "TAVILY_API_KEY": "tvly-..."
+      }
+    }
+  }
+}
+```
+
+Replace `/Users/you/.nvm/versions/node/v22.20.0/bin/node` with the path from Step 1, and the `args` path with the entry point from Step 2.
 
 ---
 
